@@ -30,19 +30,19 @@ The Weather Forecast App follows the MVVM (Model-View-ViewModel) architecture pa
 ## Setup Instructions
 To get started with the Weather Forecast App:
 
-1. # Clone the Repository:
+### 1. Clone the Repository:
 
 ```
 git clone https://github.com/yourusername/weather-forecast-app.git
 cd weather-forecast-app
 ```
-2. # Open in Android Studio:
+### 2.  Open in Android Studio:
 
 - Open Android Studio.
 - Click on "Open an existing Android Studio project".
 - Select the cloned repository folder.
 
-3. # API Key Setup:
+### 3. API Key Setup:
 
 - The app uses a weather API to fetch weather data. You'll need to obtain an API key and add it to the app:
 Register for an API key from WeatherAPI.
@@ -55,13 +55,13 @@ object consts {
     const val BASE_URL = "https://api.weatherapi.com/v1/current.json"
 }
 ```
-4. # Run the App:
+### 4. Run the App:
 
 - Connect your Android device or start an emulator.
 - Click on the "Run" button in Android Studio to build and run the app.
 
 ## Assumptions and Limitations
-# Assumptions
+### Assumptions
 - The app assumes that the user will grant location permissions when requested.
 - The app is designed to work with the WeatherAPI, and it assumes that the API responses are consistent with the current implementation.
 ## Limitations
