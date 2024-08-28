@@ -2,6 +2,7 @@ package com.example.weatherforecast.ui.screens
 
 import android.content.res.Configuration
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -28,6 +29,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -52,24 +55,49 @@ import com.example.weatherforecast.R
 import com.example.weatherforecast.data.model.WeatherItem
 import com.example.weatherforecast.data.model.WeatherNowItemData
 import com.example.weatherforecast.ui.viewmodel.MainViewModel
+import com.example.weatherforecast.utils.RequestLocationPermission
+import com.example.weatherforecast.utils.getUserLocation
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @Composable
-fun MainPage(viewModel: MainViewModel = viewModel(), latitude: String?, longitude: String?) {
-    val location by viewModel.location.observeAsState("Pune")
+fun MainPage(viewModel: MainViewModel = viewModel()) {
+    val context = LocalContext.current
+    val tag = "API Response"
+    var latitude: String? by remember { mutableStateOf(null) }
+    var longitude: String? by remember { mutableStateOf(null) }
+    val location = remember { mutableStateOf("") }
 
-    if(latitude != null && longitude != null) {
-        viewModel.setLocation("$latitude,$longitude")
-    }
 
-    viewModel.fetchWeather(location, context = LocalContext.current)
+
+
+    RequestLocationPermission(
+        onPermissionGranted = {
+            CoroutineScope(Dispatchers.Main).launch {
+                val userLocation = getUserLocation(context)
+                latitude = userLocation?.latitude?.toString()
+                longitude = userLocation?.longitude?.toString()
+                location.value = "$latitude,$longitude"
+
+                if (latitude != null && longitude != null) {
+                    viewModel.fetchWeather(location.value, context)
+                    Log.i("userLocation", "Latitude: $latitude, Longitude: $longitude")
+                }
+            }
+        },
+        onPermissionDenied = {
+            Toast.makeText(context, "Permission denied", Toast.LENGTH_SHORT).show()
+            Log.e("Location", "Permission denied")
+        }
+    )
+
+
+
     val response by viewModel.weatherResponse.observeAsState()
     val isLoading by viewModel.isLoading.observeAsState(false)
-    val tag = "API Response"
-    if (response != null) {
-        Log.d(tag, "Response: $response")
-    } else {
-        Log.d(tag, "Response: null")
-    }
+
 
     val weatherNowList = listOf(
         WeatherNowItemData(
@@ -101,17 +129,18 @@ fun MainPage(viewModel: MainViewModel = viewModel(), latitude: String?, longitud
         Column(modifier = Modifier.padding(innerPadding)) {
 
             if (isLoading) {
-                Box(modifier = Modifier
-                    .fillMaxSize(1f),
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize(1f),
                     contentAlignment = Alignment.Center
-                    ) {
+                ) {
                     CircularProgressIndicator()
                 }
             } else {
                 //Container 1
                 TopBox(modifier = Modifier.weight(0.65f), response)
                 //Container 2
-                BottomBox(modifier = Modifier.weight(0.4f), weatherNowList, location , viewModel)
+                BottomBox(modifier = Modifier.weight(0.4f), weatherNowList, location, viewModel)
             }
         }
 
@@ -183,7 +212,7 @@ private fun TopBox(modifier: Modifier, response: WeatherItem?) {
 private fun BottomBox(
     modifier: Modifier,
     weatherNowList: List<WeatherNowItemData>,
-    location: String,
+    location: MutableState<String>,
     viewModel: MainViewModel
 ) {
     val context = LocalContext.current
@@ -216,7 +245,10 @@ private fun BottomBox(
 
             TextField(
                 value = textstate,
-                onValueChange = { textstate = it },
+                onValueChange = {
+                    textstate = it
+                    location.value = textstate
+                },
                 modifier = Modifier
                     .padding(horizontal = 12.dp, vertical = 10.dp)
                     .fillMaxWidth(1f),
@@ -233,8 +265,8 @@ private fun BottomBox(
                             .size(50.dp)
                             .padding(10.dp)
                             .clickable {
-                                viewModel.setLocation(textstate)
-                                viewModel.fetchWeather(location, context)
+                                location.value = textstate
+                                viewModel.fetchWeather(location.value, context)
                             },
                         painter = painterResource(id = R.drawable.search1_ic),
                         contentDescription = "Search Icon",
@@ -244,8 +276,7 @@ private fun BottomBox(
                 keyboardActions = KeyboardActions(
                     onSearch = {
                         // Handle Done action
-                        viewModel.setLocation(textstate)
-                        viewModel.fetchWeather(textstate, context)
+                        viewModel.fetchWeather(location.value, context)
 
                     }
                 ),
@@ -317,6 +348,6 @@ fun weatherConditionIcon(condition: String): Int {
 @Composable
 fun MainPagePreview() {
     AppTheme {
-        MainPage(latitude = 37.42342342342342.toString(), longitude = (-122.08395287867832).toString())
+        MainPage()
     }
 }

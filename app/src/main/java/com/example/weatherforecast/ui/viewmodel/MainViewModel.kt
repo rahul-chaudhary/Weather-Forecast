@@ -23,6 +23,7 @@ class MainViewModel : ViewModel() {
     fun fetchWeather(location: String, context: Context) {
         viewModelScope.launch {
             _isLoading.value = true
+            _location.value = location
             try {
                 val response = apiResponse(location = location, context = context)
                 _weatherResponse.value = response
@@ -35,7 +36,7 @@ class MainViewModel : ViewModel() {
         }
     }
 
-    fun setLocation(location: String) {
-        _location.value = location
-    }
+//    fun setLocation(location: String) {
+//        _location.value = location
+//    }
 }

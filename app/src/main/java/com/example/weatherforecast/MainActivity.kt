@@ -39,25 +39,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             AppTheme {
-                var latitude: String? by remember { mutableStateOf(null) }
-                var longitude: String? by remember { mutableStateOf(null) }
-
-                RequestLocationPermission(
-                    onPermissionGranted = {
-                        CoroutineScope(Dispatchers.IO).launch {
-                            val location = getUserLocation(this@MainActivity)
-                            latitude = location?.latitude?.toString()
-                            longitude = location?.longitude?.toString()
-                            Log.i("Location", "Latitude: $latitude, Longitude: $longitude")
-
-                        }
-                    },
-                    onPermissionDenied = {
-                        Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show()
-                        Log.e("Location", "Permission denied")
-                    }
-                )
-                MainPage(latitude = latitude, longitude = longitude)
+                MainPage()
             }
         }
     }
