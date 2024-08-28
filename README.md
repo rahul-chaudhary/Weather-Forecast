@@ -1,6 +1,10 @@
 # Weather Forecast App
 A simple weather forecasting app built using Jetpack Compose and Kotlin. This app fetches weather data based on the user's current location or a specified location.
 
+
+https://github.com/user-attachments/assets/5f439aa8-4298-4192-9949-ddb32bb02fee
+
+
 ## Table of Contents
 - Features
 - Architecture
