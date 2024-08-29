@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.weatherforecast.data.model.WeatherItem
 import com.example.weatherforecast.data.source.apiResponse
+import com.example.weatherforecast.utils.showWeatherNotification
 import kotlinx.coroutines.launch
 
 class MainViewModel : ViewModel() {
@@ -27,6 +28,11 @@ class MainViewModel : ViewModel() {
             try {
                 val response = apiResponse(location = location, context = context)
                 _weatherResponse.value = response
+
+                _weatherResponse.value?.let {
+                    showWeatherNotification(context, it)
+                }
+
             } catch (e: Exception) {
                 Log.e("MainViewModel", "Error fetching weather data", e)
                 _weatherResponse.value = null
@@ -36,7 +42,4 @@ class MainViewModel : ViewModel() {
         }
     }
 
-//    fun setLocation(location: String) {
-//        _location.value = location
-//    }
 }
